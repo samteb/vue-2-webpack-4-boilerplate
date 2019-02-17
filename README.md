@@ -1,1 +1,1 @@
-# vue-2-webpack-4-boilerplate
+# Vue 2 application with webpack 4 boilerplate
