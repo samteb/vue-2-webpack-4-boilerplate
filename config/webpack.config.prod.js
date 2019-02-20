@@ -57,7 +57,8 @@ const webpackConfig = merge(commonConfig, {
   plugins: [
     new webpack.EnvironmentPlugin(environment),
     new MiniCSSExtractPlugin({
-      filename: '[name].css'
+      filename: 'css/[name].[hash].css',
+      chunkFilename: 'css/[id].[hash].css'
     }),
     new CompressionPlugin({
       filename: '[path].gz[query]',

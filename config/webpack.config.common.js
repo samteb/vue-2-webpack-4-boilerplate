@@ -15,9 +15,6 @@ const webpackConfig = {
     extensions: [ '.js', '.vue' ],
     alias: {
       'vue$': 'vue/dist/vue.runtime.js',
-      'src': helpers.root('src'),
-      'assets': helpers.root('src', 'assets'),
-      'components': helpers.root('src', 'components'),
       '@': helpers.root('src')
     }
   },
