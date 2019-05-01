@@ -1,3 +1,3 @@
 module.exports = {
-  NODE_ENV: 'staging'
+    NODE_ENV: 'staging'
 };
