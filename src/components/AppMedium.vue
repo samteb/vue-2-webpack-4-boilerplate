@@ -1,19 +1,22 @@
 <template>
   <div class="title">
     <h1>Medium Page</h1>
+    HII!!
   </div>
 </template>
 
 <script>
 export default {
-    name: 'AppMedium'
-};
+  name: 'AppMedium',
+}
 </script>
 
-<style lang="scss" scoped>
-    .title {
-        h1 {
-            color: red;
-        }
-    }
+<style lang="less" scoped>
+@color: blue;
+
+.title {
+  h1 {
+    color: @color;
+  }
+}
 </style>

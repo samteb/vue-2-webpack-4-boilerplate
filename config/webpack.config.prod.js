@@ -1,83 +1,51 @@
-'use strict';
+'use strict'
 
-const webpack                  = require('webpack');
-const merge                    = require('webpack-merge');
-const OptimizeCSSAssetsPlugin  = require('optimize-css-assets-webpack-plugin');
-const MiniCSSExtractPlugin     = require('mini-css-extract-plugin');
-const UglifyJSPlugin           = require('uglifyjs-webpack-plugin');
-const CompressionPlugin        = require('compression-webpack-plugin');
-const helpers                  = require('./helpers');
-const commonConfig             = require('./webpack.config.common');
-const isProd                   = process.env.NODE_ENV === 'production';
-const environment              = isProd ? require('./env/prod.env') : require('./env/staging.env');
+const webpack = require('webpack')
+const { merge } = require('webpack-merge')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
+const helpers = require('./helpers')
+const commonConfig = require('./webpack.config.common')
+const isProd = process.env.NODE_ENV === 'production'
+const environment = isProd ? require('./env/prod.env') : require('./env/staging.env')
 
 const webpackConfig = merge(commonConfig, {
-    mode: 'production',
-    output: {
-        path: helpers.root('dist'),
-        publicPath: '/',
-        filename: 'js/[hash].js',
-        chunkFilename: 'js/[id].[hash].chunk.js'
+  mode: 'production',
+  output: {
+    path: helpers.root('dist'),
+    publicPath: '/',
+    filename: 'js/[contenthash].js',
+    chunkFilename: 'js/[id].[contenthash].chunk.js',
+  },
+  plugins: [
+    new webpack.EnvironmentPlugin(environment),
+    // Extracts CSS into separate files
+    new MiniCssExtractPlugin({
+      filename: 'styles/[name].[contenthash].css',
+      chunkFilename: '[id].css',
+    }),
+  ],
+  optimization: {
+    minimize: true,
+    minimizer: [new CssMinimizerPlugin(), '...'],
+    runtimeChunk: {
+      name: 'runtime',
     },
-    optimization: {
-        runtimeChunk: 'single',
-        minimizer: [
-            new OptimizeCSSAssetsPlugin({
-                cssProcessorPluginOptions: {
-                    preset: [ 'default', { discardComments: { removeAll: true } } ],
-                }
-            }),
-            new UglifyJSPlugin({
-                cache: true,
-                parallel: true,
-                sourceMap: !isProd
-            })
-        ],
-        splitChunks: {
-            chunks: 'all',
-            maxInitialRequests: Infinity,
-            minSize: 0,
-            cacheGroups: {
-                vendor: {
-                    test: /[\\/]node_modules[\\/]/,
-                    name (module) {
-                        const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
-                        return `npm.${packageName.replace('@', '')}`;
-                    }
-                },
-                styles: {
-                    test: /\.css$/,
-                    name: 'styles',
-                    chunks: 'all',
-                    enforce: true
-                }
-            }
-        }
-    },
-    plugins: [
-        new webpack.EnvironmentPlugin(environment),
-        new MiniCSSExtractPlugin({
-            filename: 'css/[name].[hash].css',
-            chunkFilename: 'css/[id].[hash].css'
-        }),
-        new CompressionPlugin({
-            filename: '[path].gz[query]',
-            algorithm: 'gzip',
-            test: new RegExp('\\.(js|css)$'),
-            threshold: 10240,
-            minRatio: 0.8
-        }),
-        new webpack.HashedModuleIdsPlugin()
-    ]
-});
+  },
+  performance: {
+    hints: false,
+    maxEntrypointSize: 512000,
+    maxAssetSize: 512000,
+  },
+})
 
 if (!isProd) {
-    webpackConfig.devtool = 'source-map';
+  webpackConfig.devtool = 'source-map'
 
-    if (process.env.npm_config_report) {
-        const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-        webpackConfig.plugins.push(new BundleAnalyzerPlugin());
-    }
+  if (process.env.npm_config_report) {
+    const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+    webpackConfig.plugins.push(new BundleAnalyzerPlugin())
+  }
 }
 
-module.exports = webpackConfig;
+module.exports = webpackConfig
